@@ -10,7 +10,9 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="img/vasevqa3d_logo.png">
+    <!-- or .ico if you have it: <link rel="icon" href="images/favicon.ico"> -->
 
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
@@ -109,7 +111,7 @@
         }
 
         .vaseeval-wrapper {
-            max-width: 90%;
+            max-width: 70%;
             margin: 0 auto 3rem auto;
         }
 
@@ -121,9 +123,9 @@
         }
 
         .vaseeval-label {
-            flex: 0 0 130px;
+            flex: 0 0 110px;
             font-weight: 600;
-            font-size: 1rem;
+            letter-spacing: 0.06em;
             color: #123769;
         }
 
@@ -242,7 +244,7 @@
             <div class="row">
                 <div class="col-md-8 offset-md-2 rounded"
                     style="text-align: center; padding: 10px; padding-bottom: 0px; background-color: #eef6ff;">
-                    <h6 style="text-align: center"><strong>TL;DR: </strong>VaseVQA-3D</h6>
+                    <h6 style="text-align: center"><strong>TL;DR: </strong>VaseVQA-3D introduces the innovative 3D visual question-answering dataset for ancient Greek pottery, featuring 664 annotated vase models, while VaseVLM is a domain-adaptive vision-language model trained for cultural heritage analysis.</h6>
                 </div>
             </div>
             <br><br>
@@ -361,10 +363,11 @@
             </div>
 
             <div class="row justify-content-center">
-                <div class="col-lg-10" style="max-width: 90%;">
+                <div class="col-lg-10" style="max-width: 70%;">
                     <h3> VaseEval </h3>
                 </div>
             </div>
+            <br>
             <div class="vaseeval-wrapper">
                 <div class="vaseeval-row">
                     <div class="vaseeval-label">GT</div>
@@ -425,22 +428,63 @@
                 </div>
             </div>
 
+            <br>
+            <br>
+            <br>
+            <br>    
+
             <div class="row">
                 <div class="col-md-8 offset-md-2">
-                    <h3> Method </h3>
-                    <image width=100% src="img/method.png"
-                        alt="A diagram explaining the method in broad strokes, like explained in the caption."></image>
-
-                    <figcaption class="text-justify margin-5" style="text-align: left;">
-                        <b>Flex3D</b> comprises two stages:
-			 (1) candidate view generation and selection, and
-			 (2) 3D reconstruction using FlexRM.
-			 In the first stage, an input image or textual prompt drives the generation of a diverse set of candidate views through fine-tuned multi-view and video diffusion models.
-			 These views are subsequently filtered based on quality and consistency using a view selection mechanism.
-			 The second stage leverages the selected high-quality views, feeding them to FlexRM which reconstruct the 3D object using a tri-plane representation decoded into 3D Gaussians.
-                        </p>
+                    <h3> VaseVLM </h3><br>
+                    <image width=100% src="img/main_page-0001.jpg"
+                        alt="You browser does not support this image."></image>
+                    
+                    <br><br>
+                    <p figcaption class="text-justify margin-5" style="text-align: left;">
+                       Complete Pipeline for Vase Dataset Construction. The pipeline progresses from initial data collection (30K+ images) through quality filtering (664 images), 3D generation (664 models), QA construction (9K pairs), to final model training. Each component includes specific quality control mechanisms and validation procedures.      
+                    </p>
                 </div>
             </div>
+
+
+
+            <br>
+            <br>
+            <br>
+            <br>    
+
+            <div class="row">
+                <div class="col-md-8 offset-md-2">
+                    <h3> Data-Centric Learning </h3><br>
+                    <image width=100% src="img/filtter_page-0001.jpg"
+                        alt="You browser does not support this image."></image>
+                    
+                    <br><br>
+                    <p figcaption class="text-justify margin-5" style="text-align: left;">
+                       Complete Data Quality Filtering Pipeline. The figure shows our comprehensive filtering methodology, including ResNet-50-based quality assessment for removing low-quality images, followed by dual CLIP-based semantic filtering for fragment removal and optimal image selection.
+                    </p>
+                </div>
+            </div>
+            
+
+
+            <br>
+            <br>
+            <br>
+            <br>    
+
+            <div class="row">
+                <div class="col-md-8 offset-md-2">
+                    <h3> Reinforcement Learning </h3><br>
+                    <image width=100% src="img/rlvr_page-0001.jpg"
+                        alt="You browser does not support this image."></image>
+                    
+                    <br><br>
+                    <p figcaption class="text-justify margin-5" style="text-align: left;">
+                       Reinforcement Learning with Verifiable Rewards (RLVR) Framework. The figure shows our multi-dimensional reward computation system that evaluates archaeological descriptions across six semantic dimensions: Fabric, Technique, Shape, Dating, Decoration, and Attribution. The framework includes semantic similarity analysis, quality control penalties, and similarity rewards to ensure accurate and academically appropriate responses.
+                </div>
+            </div>
+            
             
             <!-- <div class="col-md-8 offset-md-2 text-start" style="padding-top: 4em;"></div>
                 <h4>
