@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <title>VaseVQA-3D: Benchmarking 3D VLMs on Ancient Greek Pottery</title>
+
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/codemirror.min.css">
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/fontawesome.all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+    <!-- Google tag (gtag.js) -->
+    <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-8ZERS5BVPS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-8ZERS5BVPS');
+    </script> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.5.3/clipboard.min.js"></script>
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+        </script>
+    <script defer src="js/fontawesome.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+
+    <script src="js/app.js"></script>
+    <script src="js/synced_video_selector.js"></script>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.1.1/model-viewer.min.js"></script>
+
+    <script type="module">
+        import { createSplatView, setSplatScene, setupCarousel } from "./js/splats.js"
+        setupCarousel(createSplatView("splat-picker"), document.querySelector("#splat-carousel"));
+    </script>
+    <style>
+        .final-element {
+            white-space: nowrap;
+        }
+
+        .mesh-grid .mesh-card {
+            border: 1px solid #d6e4ff;
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+        }
+
+        .mesh-card model-viewer {
+            width: 100%;
+            height: 260px;
+            background: #ffffff;
+            --poster-color: #ffffff;
+            --progress-bar-color: #2563eb;
+            --progress-bar-height: 3px;
+        }
+
+        .mesh-caption {
+            background-color: #eef6ff;
+            padding: 14px;
+            font-size: 0.95rem;
+            color: #123769;
+            line-height: 1.4;
+        }
+
+        .qa-row {
+            max-width: 70%;
+            margin: 0 auto 2rem auto;
+        }
+
+        .qa-text {
+            background-color: #eef6ff;
+            border-radius: 12px;
+            padding: 20px;
+            color: #123769;
+            height: 100%;
+            display: flex;
+            align-items: flex-start;
+            text-align: left;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+        }
+
+        @media (min-width: 768px) {
+            .qa-mesh-col {
+                flex: 0 0 30%;
+                max-width: 30%;
+            }
+
+            .qa-text-col {
+                flex: 0 0 70%;
+                max-width: 70%;
+            }
+        }
+
+        .vaseeval-wrapper {
+            max-width: 90%;
+            margin: 0 auto 3rem auto;
+        }
+
+        .vaseeval-row {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .vaseeval-label {
+            flex: 0 0 130px;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #123769;
+        }
+
+        .vaseeval-grid {
+            flex: 1;
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        }
+
+        .vaseeval-grid model-viewer {
+            width: 100%;
+            height: 220px;
+            border: 1px solid #d6e4ff;
+            border-radius: 12px;
+            background: #ffffff;
+            --poster-color: #ffffff;
+            --progress-bar-color: #2563eb;
+            --progress-bar-height: 3px;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+        }
+
+        @media (max-width: 991px) {
+            .vaseeval-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .vaseeval-label {
+                flex: none;
+            }
+
+            .vaseeval-grid {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body style="padding: 5%; padding-top: min(15px, 5%); padding-bottom: min(5px, 5%); width: 100%">
+    <div class="container-lg text-center" style="max-width: 1500px; margin: auto;" id="main">
+        <header role="banner">
+            <!-- <div class="container" id="main"> -->
+            <div class="row">
+                <h2 class="col-md-12 text-center" style="padding-top: 10px">
+                    <b>VaseVQA-3D:</b> Benchmarking 3D VLMs on Ancient Greek Pottery</br>
+                </h2>
+                <br><br><br>
+                <!-- <h4 class="col-md-12 text-center" style="padding-top: 10px; padding-bottom: 10px;">
+                    ICML 2025
+                </h4> -->
+            </div>
+            <div class="row text-center">
+                <div class="col-md-3">
+                </div>
+                <div class="container-fluid text-center">
+                    <ul class="list-inline" style="white-space: nowrap; margin:0px 0px 0px 0px;">
+                        <li><a style="font-size: calc(min(3vw, 18px))" href="#">Nonghai Zhang<sup>1*</sup></a></li>
+                        <li><a style="font-size: calc(min(3vw, 18px))" href="https://steve-zeyu-zhang.github.io/">Zeyu Zhang<sup>1*†</sup></a></li>
+                        <li><a style="font-size: calc(min(3vw, 18px))" href="#">Jiazi Wang<sup>2*</sup></a></li>
+                        <li><a style="font-size: calc(min(3vw, 18px))" href="https://yangyangkiki.github.io/">Yang Zhao<sup>3</sup></a></li>
+                        <li><a style="font-size: calc(min(3vw, 18px))" href="https://ha0tang.github.io/">Hao Tang<sup>1‡</sup></a></li>
+                    </ul>
+                </div>
+                <div class="col-md-12 text-center" style="font-size: calc(min(3vw, 16px))">
+                    <sup>1</sup>Peking University &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <sup>2</sup>Beijing Jiaotong University &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <sup>3</sup>La Trobe University &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </div>
+                <div class="col-md-12 text-center" style="font-size: calc(min(3vw, 15px))">
+                    <sup>1</sup>Equal contribution. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <sup>†</sup>Project lead. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <sup>‡</sup>Corresponding author. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </div>
+            <br>
+            <div class="row text-center">
+                <span class="link-block" style="padding-top: 10px; padding-bottom: 10px">
+                    <a href="#" class="external-link button is-normal is-rounded is-dark"
+                        style="width: 80px; font-size: 15px; text-align: center;">
+                        <span class="icon">
+                            <i class="ai ai-arxiv"></i>
+                        </span>
+                        <span>Paper</span>
+                    </a>
+                    &nbsp;&nbsp;
+                    
+                    <a href="https://github.com/AIGeeksGroup/VaseVQA-3D" class="external-link button is-normal is-rounded is-dark"
+                        style="width: 80px; font-size: 15px; text-align: center;">
+                        <span class="icon">
+                            <i class="fas fa-code"></i>
+                        </span>
+                        <span>Code</span>
+                    </a>
+                    &nbsp;&nbsp;
+                    <a href="https://huggingface.co/datasets/AIGeeksGroup/VaseVQA-3D" class="external-link button is-normal is-rounded is-dark"
+                        style="width: 80px; font-size: 15px; text-align: center;">
+                        <span class="icon">
+                            <i class="fa fa-database"></i>
+                        </span>
+                        <span>Data</span>
+                    </a>
+                    &nbsp;&nbsp;
+                    <a href="https://huggingface.co/AIGeeksGroup/VaseVLM" class="external-link button is-normal is-rounded is-dark"
+                        style="width: 80px; font-size: 15px; text-align: center;">
+                        <span class="icon">
+                            <i class="fa fa-play"></i>
+                        </span>
+                        <span>Model</span>
+                    </a>
+                </span>
+            </div>
+        </header>
+        <br>
+
+        <main role="main">
+            <div class="row">
+                <div class="col-md-8 offset-md-2 rounded"
+                    style="text-align: center; padding: 10px; padding-bottom: 0px; background-color: #eef6ff;">
+                    <h6 style="text-align: center"><strong>TL;DR: </strong>VaseVQA-3D</h6>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-md-8 offset-md-2">
+                    <video id="co3d-grid"  width="70%" autoplay loop muted controls playsinline>
+                        <source src="videos/teaser.mp4" type="video/mp4"></source>
+                    </video>
+                </div>
+            </div>
+            <br><br>
+
+
+            <br>
+            <br>
+            <br>
+            <br>
+
+            <div class="row justify-content-center">
+                <div class="col-lg-8" style="max-width: 70%;">
+                    <h3> 3D Caption Dataset </h3>
+                </div>
+            </div>
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 justify-content-center mesh-grid mt-2" style="max-width: 70%; margin: 0 auto;">
+                <div class="col">
+                    <div class="mesh-card">
+                        <model-viewer src="glb_caption/1_06E7DF47-40BF-438A-AB6D-1BD7A3C4E383_1_ac001001_textured_2k.glb_shaded.glb"
+                            alt="Mesh 1"
+                            camera-controls auto-rotate ar shadow-intensity="1.2" touch-action="pan-y"></model-viewer>
+                        <div class="mesh-caption">Athenian black-figure lekythos, c. 575–525 BCE, adorned with dogs and owls; National Museum, Copenhagen.</div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="mesh-card">
+                        <model-viewer src="glb_caption/2_7A252211-16C3-45FB-AA55-067F30C10791_2_ac001001_textured_2k.glb_shaded.glb"
+                            alt="Mesh 2"
+                            camera-controls auto-rotate ar shadow-intensity="1.2" touch-action="pan-y"></model-viewer>
+                        <div class="mesh-caption">Squat Athenian red-figure lekythos, c. 425–375 BCE, depicting a woman and Eros; Cleveland Museum of Art.</div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="mesh-card">
+                        <model-viewer src="glb_caption/3_8F8A0565-7884-4B41-BB15-CCC92DA56DF5_3_ac001001_textured_2k.glb_shaded.glb"
+                            alt="Mesh 3"
+                            camera-controls auto-rotate ar shadow-intensity="1.2" touch-action="pan-y"></model-viewer>
+                        <div class="mesh-caption">Athenian red-figure cup by Epiktetos, c. 525–475 BCE, featuring symposium scene with reclining woman.</div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="mesh-card">
+                        <model-viewer src="glb_caption/4_21C34DB6-84EF-4465-A1FD-5B99AC7475A5_1_ac001001_textured_2k.glb_shaded.glb"
+                            alt="Mesh 4"
+                            camera-controls auto-rotate ar shadow-intensity="1.2" touch-action="pan-y"></model-viewer>
+                        <div class="mesh-caption">Athenian black-figure lekythos, c. 500–450 BCE, Beldam Workshop, ivy and berry motif, Nola provenance.</div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="mesh-card">
+                        <model-viewer src="glb_caption/5_8B85AFFA-C8CF-48DD-8BC3-85924914704D_1_ac001001_textured_2k.glb_shaded.glb"
+                            alt="Mesh 5"
+                            camera-controls auto-rotate ar shadow-intensity="1.2" touch-action="pan-y"></model-viewer>
+                        <div class="mesh-caption">Athenian black-figure lekythos, c. 500–450 BCE, adorned with ivy leaf and berry motifs; National Museum, Warsaw.</div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="mesh-card">
+                        <model-viewer src="glb_caption/6_10D9A280-1C1C-40A8-B0F1-1CCBFD4B897D_1_ac001001_textured_2k.glb_shaded.glb"
+                            alt="Mesh 6"
+                            camera-controls auto-rotate ar shadow-intensity="1.2" touch-action="pan-y"></model-viewer>
+                        <div class="mesh-caption">Athenian black-figure Panathenaic amphora, c. 525–475 BCE, Athena and chariot motifs, attributed to Kleophrades Painter.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <br>
+            <br>
+            
+            <div class="row justify-content-center">
+                <div class="col-lg-8" style="max-width: 70%;">
+                    <h3> 3D-QA Dataset </h3>
+                </div>
+            </div>
+            <div class="row qa-row align-items-center">
+                <div class="col-md-6 qa-mesh-col">
+                    <model-viewer src="glb_qa/1_25CAD398-22BB-440F-A06C-50A672245D47_3_ac001001_textured_2k.glb_shaded.glb"
+                        alt="QA Mesh 1"
+                        camera-controls auto-rotate ar shadow-intensity="1.2" touch-action="pan-y"></model-viewer>
+                </div>
+                <div class="col-md-6 qa-text-col">
+                    <div class="qa-text">
+                        <div>
+                            <p><strong>Query_1</strong>: What is the fabric of the vase?<br><strong>Answer_1</strong>: The fabric of the vase is ATHENIAN.</p>
+                            <p><strong>Query_2</strong>: What is the technique of the vase?<br><strong>Answer_2</strong>: The technique of the vase is BLACK-FIGURE.</p>
+                            <p>……</p>
+                            <p><strong>Query_6</strong>: What is the decoration of the vase?<br><strong>Answer_6</strong>: The decoration of the vase is a: fight with chariot, warrior (in nebris?), shield device, snake; b: Dionysos with drinking horn between satyrs, one with wineskin.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row qa-row align-items-center">
+                <div class="col-md-6 qa-mesh-col">
+                    <model-viewer src="glb_qa/2_9D70C1A9-3C70-4A4D-A694-1042C5383A40_2_ac001001_textured_2k.glb_shaded.glb"
+                        alt="QA Mesh 2"
+                        camera-controls auto-rotate ar shadow-intensity="1.2" touch-action="pan-y"></model-viewer>
+                </div>
+                <div class="col-md-6 qa-text-col">
+                    <div class="qa-text">
+                        <div>
+                            <p><strong>Query_1</strong>: What is the fabric of the vase?<br><strong>Answer_1</strong>: The fabric of the vase is ATHENIAN.</p>
+                            <p><strong>Query_2</strong>: What is the technique of the vase?<br><strong>Answer_2</strong>: The technique of the vase is RED-FIGURE.</p>
+                            <p>……</p>
+                            <p><strong>Query_6</strong>: What is the decoration of the vase?<br><strong>Answer_6</strong>: The decoration of the vase is body: head of woman in sakkos, tendril.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-lg-10" style="max-width: 90%;">
+                    <h3> VaseEval </h3>
+                </div>
+            </div>
+            <div class="vaseeval-wrapper">
+                <div class="vaseeval-row">
+                    <div class="vaseeval-label">GT</div>
+                    <div class="vaseeval-grid">
+                        <model-viewer src="vaseeval/gt/Ancient_Greek_Vase.glb" alt="GT Ancient Greek Vase"
+                            camera-controls auto-rotate ar shadow-intensity="1.2" touch-action="pan-y"></model-viewer>
+                        <model-viewer src="vaseeval/gt/Aribalo_-_aryballos.glb" alt="GT Aribalo aryballos"
+                            camera-controls auto-rotate ar shadow-intensity="1.2" touch-action="pan-y"></model-viewer>
+                        <model-viewer src="vaseeval/gt/Attic_Black_Figure_Lekythos.glb" alt="GT Attic Black Figure Lekythos"
+                            camera-controls auto-rotate ar shadow-intensity="1.2" touch-action="pan-y"></model-viewer>
+                        <model-viewer src="vaseeval/gt/Lecito_-_lekythos_-_(MET_27.122.6).glb"
+                            alt="GT Lekythos MET 27.122.6"
+                            camera-controls auto-rotate ar shadow-intensity="1.2" touch-action="pan-y"></model-viewer>
+                        <model-viewer src="vaseeval/gt/Lecito_-_lekythos_-_(Yale_1913.112).glb"
+                            alt="GT Lekythos Yale 1913.112"
+                            camera-controls auto-rotate ar shadow-intensity="1.2" touch-action="pan-y"></model-viewer>
+                    </div>
+                </div>
+                <div class="vaseeval-row">
+                    <div class="vaseeval-label">Hunyuan3D</div>
+                    <div class="vaseeval-grid">
+                        <model-viewer src="vaseeval/hunyuan3d/Ancient_Greek_Vase_generated_(3).glb"
+                            alt="Hunyuan3D Ancient Greek Vase"
+                            camera-controls auto-rotate ar shadow-intensity="1.2" touch-action="pan-y"></model-viewer>
+                        <model-viewer src="vaseeval/hunyuan3d/Aribalo_-_aryballos_-_generated_(2).glb"
+                            alt="Hunyuan3D Aribalo aryballos"
+                            camera-controls auto-rotate ar shadow-intensity="1.2" touch-action="pan-y"></model-viewer>
+                        <model-viewer src="vaseeval/hunyuan3d/Attic_Black_Figure_Lekythos_generated_(2).glb"
+                            alt="Hunyuan3D Attic Black Figure Lekythos"
+                            camera-controls auto-rotate ar shadow-intensity="1.2" touch-action="pan-y"></model-viewer>
+                        <model-viewer src="vaseeval/hunyuan3d/Lecito_-_lekythos_-_(MET_27.122.6)_generated_(2).glb"
+                            alt="Hunyuan3D Lekythos MET 27.122.6"
+                            camera-controls auto-rotate ar shadow-intensity="1.2" touch-action="pan-y"></model-viewer>
+                        <model-viewer src="vaseeval/hunyuan3d/Lecito_-_lekythos_-_(Yale_1913.112)_generated_(2).glb"
+                            alt="Hunyuan3D Lekythos Yale 1913.112"
+                            camera-controls auto-rotate ar shadow-intensity="1.2" touch-action="pan-y"></model-viewer>
+                    </div>
+                </div>
+                <div class="vaseeval-row">
+                    <div class="vaseeval-label">TripoSG</div>
+                    <div class="vaseeval-grid">
+                        <model-viewer src="vaseeval/triposg/Ancient_Greek_Vase_textured_4k.glb_shaded_(1).glb"
+                            alt="TripoSG Ancient Greek Vase"
+                            camera-controls auto-rotate ar shadow-intensity="1.2" touch-action="pan-y"></model-viewer>
+                        <model-viewer src="vaseeval/triposg/Aribalo_-_aryballos_-_textured_4k.glb_shaded_(1).glb"
+                            alt="TripoSG Aribalo aryballos"
+                            camera-controls auto-rotate ar shadow-intensity="1.2" touch-action="pan-y"></model-viewer>
+                        <model-viewer src="vaseeval/triposg/Attic_Black_Figure_Lekythos_textured_4k.glb_shaded.glb"
+                            alt="TripoSG Attic Black Figure Lekythos"
+                            camera-controls auto-rotate ar shadow-intensity="1.2" touch-action="pan-y"></model-viewer>
+                        <model-viewer src="vaseeval/triposg/Lecito_-_lekythos_-_(MET_27.122.6)_textured_4k.glb_shaded.glb"
+                            alt="TripoSG Lekythos MET 27.122.6"
+                            camera-controls auto-rotate ar shadow-intensity="1.2" touch-action="pan-y"></model-viewer>
+                        <model-viewer src="vaseeval/triposg/Lecito_-_lekythos_-_(Yale_1913.112)_textured_4k.glb_shaded.glb"
+                            alt="TripoSG Lekythos Yale 1913.112"
+                            camera-controls auto-rotate ar shadow-intensity="1.2" touch-action="pan-y"></model-viewer>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-8 offset-md-2">
+                    <h3> Method </h3>
+                    <image width=100% src="img/method.png"
+                        alt="A diagram explaining the method in broad strokes, like explained in the caption."></image>
+
+                    <figcaption class="text-justify margin-5" style="text-align: left;">
+                        <b>Flex3D</b> comprises two stages:
+			 (1) candidate view generation and selection, and
+			 (2) 3D reconstruction using FlexRM.
+			 In the first stage, an input image or textual prompt drives the generation of a diverse set of candidate views through fine-tuned multi-view and video diffusion models.
+			 These views are subsequently filtered based on quality and consistency using a view selection mechanism.
+			 The second stage leverages the selected high-quality views, feeding them to FlexRM which reconstruct the 3D object using a tri-plane representation decoded into 3D Gaussians.
+                        </p>
+                </div>
+            </div>
+            
+            <!-- <div class="col-md-8 offset-md-2 text-start" style="padding-top: 4em;"></div>
+                <h4>
+                    Acknowledgements
+                </h4>
+
+                <p class="text-justify" style="text-align: middle;">
+                    We thank the authors of 
+                    
+                </p>
+            </div> -->
+
+            <br><br><br>
+            <div class="row justify-content-center">
+                <div class="col-md-8 center text-start">
+                    <label style="display: inline" for="bibtex">
+                        <h4 style="text-align: center">BibTeX </h4>
+                    </label>
+                    <textarea id="bibtex" class="form-control" readonly>
+@article{ge2025vasevqa,
+  title={VaseVQA: Multimodal Agent and Benchmark for Ancient Greek Pottery},
+  author={Ge, Jinchao and Cheng, Tengfei and Wu, Biao and Zhang, Zeyu and Huang, Shiya and Bishop, Judith and Shepherd, Gillian and Fang, Meng and Chen, Ling and Zhao, Yang},
+  journal={arXiv preprint arXiv:2509.17191},
+  year={2025}
+}
+                        </textarea>
+                </div>
+            </div> 
+
+        </main>
+
+        <br><br>
+        <hr style="width: 70%; text-align: center; margin-left: auto; margin-right: auto;">
+        <footer>
+            <div class="row">
+                <div class="col-md-8 offset-md-2 text-start">
+
+                    <p class="text-justify" style="text-align: center;">
+                        <i>
+                            VaseVQA-3D: Benchmarking 3D VLMs on Ancient Greek Pottery
+                        </i>
+                    </p>
+                </div>
+            </div>
+
+        </footer>
+    </div>
+</body>
+
+</html>
