@@ -3,7 +3,7 @@
 This is the official repository for the paper:
 > **VaseVQA-3D: Benchmarking 3D VLMs on Ancient Greek Pottery**
 >
-> [Nonghai Zhang](https://github.com/zhangnonghai)\*, [Zeyu Zhang](https://steve-zeyu-zhang.github.io/)\*, [Jiazi Wang](https://github.com/wangjiazi), [Yang Zhao](https://github.com/zhaoyang), and [Hao Tang](https://ha0tang.github.io/)<sup>#</sup>
+> [Nonghai Zhang](https://github.com/sleepyDogseasea)\*, [Zeyu Zhang](https://steve-zeyu-zhang.github.io/)\*, [Jiazi Wang](https://github.com/wangjiazi), [Yang Zhao](https://github.com/zhaoyang), and [Hao Tang](https://ha0tang.github.io/)<sup>#</sup>
 >
 > \*Equal contribution. <sup>#</sup>Corresponding author.
 >
@@ -265,22 +265,48 @@ For detailed evaluation instructions, see [eval/README.md](./eval/README.md).
 
 ### Caption Generation Performance
 
-| Model | CLIP Score | Semantic Sim | R@10 | Overall Score |
-|-------|------------|--------------|------|---------------|
-| VaseVLM-7B | **0.8567** | **0.8123** | **0.93** | **0.8234** |
-| VaseVLM-3B | 0.8234 | 0.7891 | 0.91 | 0.7823 |
-| Qwen2.5-VL-7B | 0.7891 | 0.7456 | 0.87 | 0.7512 |
-| InternVL3_5-4B | 0.7654 | 0.7234 | 0.85 | 0.7289 |
-| GPT-4V | 0.7123 | 0.6891 | 0.82 | 0.6945 |
+We evaluate various models on the VaseVQA-3D benchmark. Lower FID scores and higher values for other metrics indicate better performance.
 
-### Question Answering Performance
+#### 3D-Specialized Models
 
-| Model | Accuracy | F1 Score | BLEU-4 |
-|-------|----------|----------|--------|
-| VaseVLM-7B | **78.5%** | **0.812** | **0.456** |
-| VaseVLM-3B | 74.2% | 0.789 | 0.423 |
-| Qwen2.5-VL-7B | 68.9% | 0.734 | 0.389 |
-| InternVL3_5-4B | 65.3% | 0.701 | 0.367 |
+| Method | FID↓ | CLIP↑ | R@10↑ | R@5↑ | R@1↑ | Lexical Sim.↑ |
+|--------|------|-------|-------|------|------|---------------|
+| DiffuRank | 0.421 | **0.798** | 16.67% | 8.33% | 2.08% | 0.274 |
+| Cap3D | 0.445 | 0.792 | 14.58% | 7.29% | 1.56% | 0.267 |
+| LLaVA3D | 0.494 | 0.784 | 10.42% | 5.21% | 1.04% | 0.238 |
+
+#### Closed-source VLMs
+
+| Method | FID↓ | CLIP↑ | R@10↑ | R@5↑ | R@1↑ | Lexical Sim.↑ |
+|--------|------|-------|-------|------|------|---------------|
+| Gemini-2.5-flash | **0.325** | 0.736 | **28.57%** | **17.58%** | 2.20% | 0.210 |
+| Claude-4-sonnet | 0.353 | 0.676 | 23.96% | 10.42% | 3.12% | 0.188 |
+| Gemini-2.5-Pro | 0.397 | 0.680 | 22.92% | 14.58% | 3.12% | 0.162 |
+| GPT-4.1 | 0.501 | 0.644 | 25.00% | 10.42% | 3.12% | 0.128 |
+| Claude-3.5-sonnet | 0.455 | 0.643 | 15.62% | 8.33% | 2.08% | 0.116 |
+| Doubao-1.5-vision-pro-32k | 0.504 | 0.606 | 14.58% | 4.17% | 1.04% | 0.074 |
+| GPT-4o | 0.582 | 0.520 | 13.54% | 6.25% | 2.08% | 0.104 |
+| Claude-3.7-sonnet | 0.600 | 0.339 | 13.54% | 6.25% | 1.04% | 0.101 |
+
+#### Open-source VLMs
+
+| Method | FID↓ | CLIP↑ | R@10↑ | R@5↑ | R@1↑ | Lexical Sim.↑ |
+|--------|------|-------|-------|------|------|---------------|
+| InternVL | 0.376 | 0.771 | 10.42% | 8.33% | 2.08% | 0.252 |
+| Qwen2.5-VL-7B | 0.334 | 0.775 | 18.75% | 9.38% | 2.08% | 0.217 |
+| Qwen2.5-VL-3B | 0.358 | 0.782 | 9.38% | 6.25% | 1.04% | 0.259 |
+| VaseVL | 0.493 | 0.790 | 10.4% | 6.25% | 2.08% | 0.255 |
+
+#### Our Models
+
+| Method | FID↓ | CLIP↑ | R@10↑ | R@5↑ | R@1↑ | Lexical Sim.↑ |
+|--------|------|-------|-------|------|------|---------------|
+| **VaseVLM-3B-SFT** | 0.359 | 0.788 | 17.71% | 8.33% | 2.08% | 0.223 |
+| **VaseVLM-3B-RL** | 0.363 | 0.789 | 17.71% | 10.42% | 2.08% | 0.245 |
+| **VaseVLM-7B-SFT** | 0.332 | 0.779 | 20.83% | 10.42% | 3.12% | 0.272 |
+| **VaseVLM-7B-RL** | 0.328 | 0.792 | 21.24% | 11.12% | **3.52%** | **0.276** |
+
+> **Note**: Our VaseVLM-7B-RL model achieves the best performance among open-source models on R@1 and Lexical Similarity metrics, demonstrating the effectiveness of reinforcement learning fine-tuning for cultural heritage understanding.
 
 ## 🎯 Use Cases
 
