@@ -1,398 +1,398 @@
-# VaseVQA-3D 训练模块
+# VaseVQA-3D Training Module
 
-本目录包含 VaseVQA-3D 项目的训练相关代码，主要分为两个子模块：**数据过滤（Filter）** 和 **模型训练（Model）**。
+This directory contains the training-related code for the VaseVQA-3D project, mainly divided into two sub-modules: **Data Filtering** and **Model Training**.
 
-## 📁 目录结构
+## 📁 Directory Structure
 
 ```
 Train/
-├── filter/                    # 数据过滤模块
-│   ├── classifier.py         # 图像质量分类器
-│   ├── clipfilter1.py        # CLIP过滤器（质量过滤）
-│   ├── clipfilter1.sh        # CLIP过滤器启动脚本
-│   ├── clipfilter2.py        # CLIP过滤器（视角选择）
-│   └── model.py              # ResNet50分类模型
-├── model/                     # 模型训练模块
-│   ├── sft.sh                # 监督微调脚本
-│   ├── grpo.sh               # GRPO强化学习训练脚本
-│   ├── merge.sh              # LoRA权重合并脚本
-│   ├── hf2megatron.sh        # HuggingFace转Megatron脚本
-│   └── requirements.txt      # Python依赖包
-└── README.md                  # 本文档
+├── filter/                    # Data filtering module
+│   ├── classifier.py         # Image quality classifier
+│   ├── clipfilter1.py        # CLIP filter (quality filtering)
+│   ├── clipfilter1.sh        # CLIP filter startup script
+│   ├── clipfilter2.py        # CLIP filter (view selection)
+│   └── model.py              # ResNet50 classification model
+├── model/                     # Model training module
+│   ├── sft.sh                # Supervised fine-tuning script
+│   ├── grpo.sh               # GRPO reinforcement learning training script
+│   ├── merge.sh              # LoRA weight merging script
+│   ├── hf2megatron.sh        # HuggingFace to Megatron conversion script
+│   └── requirements.txt      # Python dependencies
+└── README.md                  # This document
 ```
 
 ---
 
-## 🔍 数据过滤模块 (Filter)
+## 🔍 Data Filtering Module
 
-数据过滤模块用于从原始数据集中筛选高质量图像，包括基于ResNet50的质量分类和基于CLIP的视角选择。
+The data filtering module is used to filter high-quality images from the raw dataset, including ResNet50-based quality classification and CLIP-based view selection.
 
-### 1. ResNet50 图像质量分类器
+### 1. ResNet50 Image Quality Classifier
 
-#### 文件说明
-- **`model.py`**: ResNet50二分类模型定义和训练代码
-- **`classifier.py`**: 使用训练好的模型进行批量分类
+#### File Description
+- **`model.py`**: ResNet50 binary classification model definition and training code
+- **`classifier.py`**: Batch classification using trained model
 
-#### 功能特点
-- 使用预训练的 ResNet50 作为骨干网络
-- 二分类任务：0（低质量）/ 1（高质量）
-- 支持批量处理和GPU加速
-- 自动数据增强和验证
+#### Features
+- Uses pre-trained ResNet50 as backbone network
+- Binary classification task: 0 (low quality) / 1 (high quality)
+- Supports batch processing and GPU acceleration
+- Automatic data augmentation and validation
 
-#### 使用方法
+#### Usage
 
-**训练模型：**
+**Train Model:**
 ```bash
 cd filter
 python model.py
 ```
 
-配置参数（在 `model.py` 中修改）：
+Configuration parameters (modify in `model.py`):
 ```python
-DEFAULT_GPU = 2          # 使用的GPU编号
-BATCH_SIZE = 256         # 批次大小
-NUM_EPOCHS = 200         # 训练轮数
-DATA_DIR = 'images2'     # 数据目录
+DEFAULT_GPU = 2          # GPU number to use
+BATCH_SIZE = 256         # Batch size
+NUM_EPOCHS = 200         # Training epochs
+DATA_DIR = 'images2'     # Data directory
 ```
 
-数据目录结构：
+Data directory structure:
 ```
 images2/
-├── 0/                   # 低质量图片
+├── 0/                   # Low quality images
 │   ├── image1.jpg
 │   └── ...
-└── 1/                   # 高质量图片
+└── 1/                   # High quality images
     ├── image2.jpg
     └── ...
 ```
 
-**使用分类器：**
+**Use Classifier:**
 ```bash
 python classifier.py
 ```
 
-配置参数（在 `classifier.py` 中修改）：
+Configuration parameters (modify in `classifier.py`):
 ```python
-DEFAULT_GPU = 2                                    # GPU编号
-MODEL_PATH = 'best_image_quality_model.pth'        # 模型路径
-SOURCE_DIR = 'images'                              # 源图片目录
-TARGET_DIR = 'images3'                             # 目标目录
-BATCH_SIZE = 32                                    # 批处理大小
+DEFAULT_GPU = 2                                    # GPU number
+MODEL_PATH = 'best_image_quality_model.pth'        # Model path
+SOURCE_DIR = 'images'                              # Source image directory
+TARGET_DIR = 'images3'                             # Target directory
+BATCH_SIZE = 32                                    # Batch size
 ```
 
-输出结果：
+Output:
 ```
 images3/
-├── 0/                   # 分类为低质量的图片
-└── 1/                   # 分类为高质量的图片
+├── 0/                   # Images classified as low quality
+└── 1/                   # Images classified as high quality
 ```
 
 ---
 
-### 2. CLIP 图像质量过滤器
+### 2. CLIP Image Quality Filter
 
-#### 文件说明
-- **`clipfilter1.py`**: 基于CLIP的图像质量过滤
-- **`clipfilter1.sh`**: 交互式启动脚本
-- **`clipfilter2.py`**: 基于CLIP的最佳视角选择
+#### File Description
+- **`clipfilter1.py`**: CLIP-based image quality filtering
+- **`clipfilter1.sh`**: Interactive startup script
+- **`clipfilter2.py`**: CLIP-based best view selection
 
-#### clipfilter1 - 质量过滤
+#### clipfilter1 - Quality Filtering
 
-**功能特点：**
-- 使用CLIP模型评估图像质量
-- 支持质量分布分析
-- 自动阈值推荐
-- 批量处理和进度跟踪
+**Features:**
+- Uses CLIP model to evaluate image quality
+- Supports quality distribution analysis
+- Automatic threshold recommendation
+- Batch processing and progress tracking
 
-**使用方法：**
+**Usage:**
 
-方式一：使用交互式脚本（推荐）
+Method 1: Use interactive script (recommended)
 ```bash
 ./clipfilter1.sh
 ```
 
-脚本提供以下选项：
-1. 🔍 仅分析数据集质量分布
-2. 🎯 自动过滤（先分析后过滤）
-3. ⚙️ 自定义阈值过滤
-4. 💻 强制使用CPU模式
-5. 🎮 使用GPU 1
-6. 📊 快速分析（100个样本）
+Script options:
+1. 🔍 Analyze dataset quality distribution only
+2. 🎯 Automatic filtering (analyze then filter)
+3. ⚙️ Custom threshold filtering
+4. 💻 Force CPU mode
+5. 🎮 Use GPU 1
+6. 📊 Quick analysis (100 samples)
 
-方式二：直接运行Python脚本
+Method 2: Run Python script directly
 ```bash
-# 分析质量分布
+# Analyze quality distribution
 python clipfilter1.py --analyze_only --input_dir ./images3/1
 
-# 执行过滤
+# Execute filtering
 python clipfilter1.py --input_dir ./images3/1 \
                       --output_dir ./filtered_vases \
                       --threshold 0.15 \
                       --model_cache_dir ./model
 ```
 
-**参数说明：**
-- `--input_dir`: 输入图像目录
-- `--output_dir`: 输出目录
-- `--threshold`: 质量阈值（可选，不指定则自动分析）
-- `--analyze_only`: 仅分析质量分布
-- `--sample_size`: 分析时的采样大小（默认500）
-- `--device`: 指定设备（cuda:0, cuda:1, cpu等）
-- `--model_cache_dir`: CLIP模型缓存目录
-- `--auto_select_device`: 交互式选择设备
+**Parameters:**
+- `--input_dir`: Input image directory
+- `--output_dir`: Output directory
+- `--threshold`: Quality threshold (optional, auto-analyze if not specified)
+- `--analyze_only`: Only analyze quality distribution
+- `--sample_size`: Sample size for analysis (default 500)
+- `--device`: Specify device (cuda:0, cuda:1, cpu, etc.)
+- `--model_cache_dir`: CLIP model cache directory
+- `--auto_select_device`: Interactive device selection
 
-**输出结果：**
+**Output:**
 ```
 filtered_vases/
-├── accepted/            # 通过质量检查的图片
-├── rejected/            # 未通过质量检查的图片
-└── filtering_report.json  # 详细过滤报告
+├── accepted/            # Images passing quality check
+├── rejected/            # Images failing quality check
+└── filtering_report.json  # Detailed filtering report
 ```
 
-#### clipfilter2 - 最佳视角选择
+#### clipfilter2 - Best View Selection
 
-**功能特点：**
-- 为每个花瓶选择CLIP得分最高的视角
-- 自动识别多视角图片
-- 生成详细的选择报告
+**Features:**
+- Selects the view with highest CLIP score for each vase
+- Automatically identifies multi-view images
+- Generates detailed selection report
 
-**使用方法：**
+**Usage:**
 ```bash
 python clipfilter2.py --input_dir ./filtered_vases/accepted \
                       --output_dir ./filtered_vases \
                       --device cuda:0
 ```
 
-**参数说明：**
-- `--input_dir`: 包含多视角图片的输入目录
-- `--output_dir`: 输出目录
-- `--device`: 指定设备
+**Parameters:**
+- `--input_dir`: Input directory containing multi-view images
+- `--output_dir`: Output directory
+- `--device`: Specify device
 
-**输出结果：**
+**Output:**
 ```
 filtered_vases/
-├── best_views/                    # 每个花瓶的最佳视角
-├── best_views_report.json         # 详细报告
-└── filtering_stats.json           # 统计信息
+├── best_views/                    # Best view for each vase
+├── best_views_report.json         # Detailed report
+└── filtering_stats.json           # Statistics
 ```
 
 ---
 
-## 🚀 模型训练模块 (Model)
+## 🚀 Model Training Module
 
-模型训练模块基于 MS-SWIFT 框架，支持监督微调（SFT）和强化学习（GRPO）训练。
+The model training module is based on the MS-SWIFT framework, supporting Supervised Fine-Tuning (SFT) and Reinforcement Learning (GRPO) training.
 
-### 环境配置
+### Environment Setup
 
-**1. 创建Conda环境：**
+**1. Create Conda environment:**
 ```bash
 conda create -n swift_env python=3.10
 conda activate swift_env
 ```
 
-**2. 安装依赖：**
+**2. Install dependencies:**
 ```bash
 cd model
 pip install -r requirements.txt
 ```
 
-**主要依赖：**
+**Main dependencies:**
 - PyTorch 2.0+
 - MS-SWIFT 2.0+
 - Transformers 4.35+
-- 其他深度学习工具
+- Other deep learning tools
 
 ---
 
-### 1. 监督微调 (SFT)
+### 1. Supervised Fine-tuning (SFT)
 
-**脚本：** `sft.sh`
+**Script:** `sft.sh`
 
-**功能：** 使用标注数据对视觉语言模型进行监督微调
+**Function:** Supervised fine-tuning of vision-language models using annotated data
 
-**使用方法：**
+**Usage:**
 ```bash
 ./sft.sh
 ```
 
-**主要参数：**
+**Main parameters:**
 ```bash
-CUDA_VISIBLE_DEVICES=0              # 使用的GPU
-MAX_PIXELS=1003520                  # 最大像素数
---model './models/Qwen2.5-VL-7B-Instruct'  # 模型路径
---dataset './data/video_training_dataset.json'  # 训练数据
---train_type lora                   # 训练类型（lora/full）
---num_train_epochs 2                # 训练轮数
---per_device_train_batch_size 1     # 批次大小
---learning_rate 1e-4                # 学习率
---lora_rank 8                       # LoRA秩
---output_dir output/7B              # 输出目录
+CUDA_VISIBLE_DEVICES=0              # GPU to use
+MAX_PIXELS=1003520                  # Maximum pixels
+--model './models/Qwen2.5-VL-7B-Instruct'  # Model path
+--dataset './data/video_training_dataset.json'  # Training data
+--train_type lora                   # Training type (lora/full)
+--num_train_epochs 2                # Training epochs
+--per_device_train_batch_size 1     # Batch size
+--learning_rate 1e-4                # Learning rate
+--lora_rank 8                       # LoRA rank
+--output_dir output/7B              # Output directory
 ```
 
-**数据格式：**
+**Data format:**
 ```json
 [
   {
     "images": ["path/to/image.jpg"],
-    "caption": "描述文本",
+    "caption": "Description text",
     "conversations": [...]
   }
 ]
 ```
 
-**输出：**
-- 训练好的LoRA权重
-- 训练日志和TensorBoard记录
-- 定期保存的检查点
+**Output:**
+- Trained LoRA weights
+- Training logs and TensorBoard records
+- Periodically saved checkpoints
 
 ---
 
-### 2. GRPO 强化学习训练
+### 2. GRPO Reinforcement Learning Training
 
-**脚本：** `grpo.sh`
+**Script:** `grpo.sh`
 
-**功能：** 使用GRPO算法进行强化学习训练，优化模型输出质量
+**Function:** Reinforcement learning training using GRPO algorithm to optimize model output quality
 
-**使用方法：**
+**Usage:**
 ```bash
 ./grpo.sh
 ```
 
-**主要参数：**
+**Main parameters:**
 ```bash
---rlhf_type grpo                    # 强化学习类型
---model './output/checkpoint-merged'  # 基础模型
---external_plugins ./plugin/plugin.py  # 外部插件
---reward_funcs external_vase_acc    # 奖励函数
---dataset './data/grpo_video_dataset.json'  # 训练数据
---num_train_epochs 1                # 训练轮数
---learning_rate 1e-6                # 学习率
---num_generations 4                 # 每次生成数量
---temperature 1.0                   # 采样温度
---beta 0.001                        # KL散度系数
---system ./prompt.txt               # 系统提示
+--rlhf_type grpo                    # Reinforcement learning type
+--model './output/checkpoint-merged'  # Base model
+--external_plugins ./plugin/plugin.py  # External plugins
+--reward_funcs external_vase_acc    # Reward function
+--dataset './data/grpo_video_dataset.json'  # Training data
+--num_train_epochs 1                # Training epochs
+--learning_rate 1e-6                # Learning rate
+--num_generations 4                 # Number of generations per iteration
+--temperature 1.0                   # Sampling temperature
+--beta 0.001                        # KL divergence coefficient
+--system ./prompt.txt               # System prompt
 ```
 
-**奖励函数：**
-需要在 `plugin/plugin.py` 中定义自定义奖励函数，例如：
+**Reward function:**
+Define custom reward function in `plugin/plugin.py`, for example:
 ```python
 def external_vase_acc(responses, references):
-    # 计算奖励分数
+    # Calculate reward scores
     return scores
 ```
 
 ---
 
-### 3. LoRA 权重合并
+### 3. LoRA Weight Merging
 
-**脚本：** `merge.sh`
+**Script:** `merge.sh`
 
-**功能：** 将训练好的LoRA权重合并到基础模型
+**Function:** Merge trained LoRA weights into base model
 
-**使用方法：**
+**Usage:**
 ```bash
 ./merge.sh
 ```
 
-**参数：**
+**Parameters:**
 ```bash
---adapters ./output/checkpoint-600  # LoRA权重路径
---merge_lora true                   # 启用合并
+--adapters ./output/checkpoint-600  # LoRA weights path
+--merge_lora true                   # Enable merging
 ```
 
-**输出：**
-- 合并后的完整模型
-- 可直接用于推理或进一步训练
+**Output:**
+- Merged complete model
+- Can be directly used for inference or further training
 
 ---
 
-### 4. HuggingFace 转 Megatron
+### 4. HuggingFace to Megatron Conversion
 
-**脚本：** `hf2megatron.sh`
+**Script:** `hf2megatron.sh`
 
-**功能：** 将HuggingFace格式模型转换为Megatron格式
+**Function:** Convert HuggingFace format model to Megatron format
 
-**使用方法：**
+**Usage:**
 ```bash
 ./hf2megatron.sh
 ```
 
-**参数：**
+**Parameters:**
 ```bash
---model './models/Qwen2.5-VL-3B-Instruct'  # 输入模型
---to_mcore true                     # 转换为Megatron格式
---torch_dtype bfloat16              # 数据类型
---output_dir output/Qwen2.5-VL-3B-Instruct-mcore  # 输出目录
---test_convert_precision true       # 测试转换精度
+--model './models/Qwen2.5-VL-3B-Instruct'  # Input model
+--to_mcore true                     # Convert to Megatron format
+--torch_dtype bfloat16              # Data type
+--output_dir output/Qwen2.5-VL-3B-Instruct-mcore  # Output directory
+--test_convert_precision true       # Test conversion precision
 ```
 
 ---
 
-## 📊 完整训练流程
+## 📊 Complete Training Pipeline
 
-### 数据准备和过滤
+### Data Preparation and Filtering
 
 ```bash
-# 1. 使用ResNet50分类器过滤低质量图片
+# 1. Filter low-quality images using ResNet50 classifier
 cd filter
 python classifier.py
 
-# 2. 使用CLIP过滤器进一步筛选
+# 2. Further filtering using CLIP filter
 ./clipfilter1.sh
-# 选择选项2：自动过滤
+# Select option 2: Automatic filtering
 
-# 3. 选择最佳视角
+# 3. Select best views
 python clipfilter2.py --input_dir ./filtered_vases/accepted \
                       --output_dir ./filtered_vases
 ```
 
-### 模型训练
+### Model Training
 
 ```bash
 cd ../model
 
-# 1. 监督微调
+# 1. Supervised fine-tuning
 ./sft.sh
 
-# 2. 合并LoRA权重
+# 2. Merge LoRA weights
 ./merge.sh
 
-# 3. GRPO强化学习（可选）
+# 3. GRPO reinforcement learning (optional)
 ./grpo.sh
 
-# 4. 再次合并权重
+# 4. Merge weights again
 ./merge.sh
 ```
 
 ---
 
-## 🔧 配置说明
+## 🔧 Configuration
 
-### GPU 配置
+### GPU Configuration
 
-所有脚本都支持通过环境变量配置GPU：
+All scripts support GPU configuration via environment variables:
 
 ```bash
-# 单卡
+# Single GPU
 export CUDA_VISIBLE_DEVICES=0
 
-# 多卡
+# Multiple GPUs
 export CUDA_VISIBLE_DEVICES=0,1,2,3
 export NPROC_PER_NODE=4
 ```
 
-### 代理配置
+### Proxy Configuration
 
-如需使用代理下载模型：
+If you need to use a proxy to download models:
 
 ```bash
 export http_proxy=http://your_proxy:port
 export https_proxy=http://your_proxy:port
 ```
 
-### 模型缓存
+### Model Cache
 
-设置模型缓存目录：
+Set model cache directory:
 
 ```bash
 export HF_HOME=./cache
@@ -401,71 +401,71 @@ export TRANSFORMERS_CACHE=./cache
 
 ---
 
-## 📝 注意事项
+## 📝 Notes
 
-1. **显存要求**
-   - ResNet50训练：≥ 8GB
-   - SFT训练（7B模型）：≥ 24GB
-   - GRPO训练：≥ 32GB
+1. **Memory Requirements**
+   - ResNet50 training: ≥ 8GB
+   - SFT training (7B model): ≥ 24GB
+   - GRPO training: ≥ 32GB
 
-2. **数据格式**
-   - 图片格式：PNG, JPG, JPEG
-   - 训练数据：JSON格式
-   - 确保数据路径正确
+2. **Data Format**
+   - Image format: PNG, JPG, JPEG
+   - Training data: JSON format
+   - Ensure correct data paths
 
-3. **训练时间**
-   - ResNet50训练：2-4小时（200 epochs）
-   - SFT训练：根据数据量，通常数小时到数天
-   - GRPO训练：比SFT慢2-3倍
+3. **Training Time**
+   - ResNet50 training: 2-4 hours (200 epochs)
+   - SFT training: Hours to days depending on data size
+   - GRPO training: 2-3x slower than SFT
 
-4. **检查点管理**
-   - 定期保存检查点
-   - 设置 `save_total_limit` 限制检查点数量
-   - 及时备份重要检查点
+4. **Checkpoint Management**
+   - Save checkpoints periodically
+   - Set `save_total_limit` to limit checkpoint count
+   - Backup important checkpoints promptly
 
 ---
 
-## 🐛 故障排除
+## 🐛 Troubleshooting
 
-### 常见问题
+### Common Issues
 
 **1. CUDA Out of Memory**
 ```bash
-# 减小批次大小
+# Reduce batch size
 --per_device_train_batch_size 1
 
-# 启用梯度检查点
+# Enable gradient checkpointing
 --gradient_checkpointing true
 
-# 使用更小的模型
+# Use smaller model
 ```
 
-**2. 模型加载失败**
+**2. Model Loading Failed**
 ```bash
-# 检查模型路径
+# Check model path
 ls -la ./models/
 
-# 检查权限
+# Check permissions
 chmod -R 755 ./models/
 
-# 重新下载模型
+# Re-download model
 ```
 
-**3. 训练中断**
+**3. Training Interrupted**
 ```bash
-# 从检查点恢复
+# Resume from checkpoint
 --resume_from_checkpoint ./output/checkpoint-XXX
 ```
 
 ---
 
-## 📚 参考资源
+## 📚 References
 
-- [MS-SWIFT 文档](https://github.com/modelscope/swift)
-- [Qwen2.5-VL 模型](https://huggingface.co/Qwen)
-- [CLIP 模型](https://github.com/openai/CLIP)
-- [ResNet 论文](https://arxiv.org/abs/1512.03385)
+- [MS-SWIFT Documentation](https://github.com/modelscope/swift)
+- [Qwen2.5-VL Model](https://huggingface.co/Qwen)
+- [CLIP Model](https://github.com/openai/CLIP)
+- [ResNet Paper](https://arxiv.org/abs/1512.03385)
 
 ---
 
-**💡 提示**: 建议先在小数据集上测试完整流程，确认无误后再进行大规模训练。
+**💡 Tip**: It is recommended to test the complete pipeline on a small dataset first to ensure everything works correctly before large-scale training.

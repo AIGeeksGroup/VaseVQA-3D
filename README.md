@@ -28,14 +28,19 @@ If you find our code or paper helpful, please consider starring ⭐ us and citin
 
 ## 🏺 Introduction to VaseVQA-3D
 
-VaseVQA-3D is a comprehensive benchmark for evaluating 3D Vision-Language Models (VLMs) on ancient Greek pottery understanding. This project addresses the unique challenges of cultural heritage analysis by providing:
+Vision-Language Models (VLMs) have achieved significant progress in multimodal understanding tasks, demonstrating strong capabilities particularly in general tasks such as image captioning and visual reasoning. However, when dealing with specialized cultural heritage domains like 3D vase artifacts, existing models face severe data scarcity issues and insufficient domain knowledge limitations. Due to the lack of targeted training data, current VLMs struggle to effectively handle such culturally significant specialized tasks.
 
-- **High-quality 3D Models**: A curated dataset of ancient Greek vases with detailed 3D reconstructions
+To address these challenges, we propose the **VaseVQA-3D dataset**, which serves as the first 3D visual question answering dataset for ancient Greek pottery analysis, collecting 664 ancient Greek vase 3D models with corresponding question-answer data and establishing a complete data construction pipeline. We further develop the **VaseVLM model**, enhancing model performance in vase artifact analysis through domain-adaptive training.
+
+Experimental results validate the effectiveness of our approach, where we improve by **12.8% on R@1 metrics** and by **6.6% on lexical similarity** compared with previous state-of-the-art on the VaseVQA-3D dataset, significantly improving the recognition and understanding of 3D vase artifacts, providing new technical pathways for digital heritage preservation research.
+
+### Key Features
+
+- **High-quality 3D Models**: 664 ancient Greek vases with detailed 3D reconstructions
 - **Multi-view Analysis**: Comprehensive evaluation from multiple perspectives (front, back, left, right, top, bottom)
 - **Specialized Tasks**: Question answering, captioning, and visual grounding tailored for archaeological artifacts
 - **VaseVLM**: A fine-tuned vision-language model specifically designed for ancient pottery analysis
-
-Ancient Greek pottery represents a crucial aspect of cultural heritage, containing rich historical and artistic information. However, existing 3D VLMs struggle with the specialized knowledge and visual understanding required for archaeological analysis. VaseVQA-3D bridges this gap by providing a standardized benchmark and specialized models for this domain.
+- **Complete Pipeline**: End-to-end data construction and model training framework
 
 ![image](./figs/overview.png)
 

@@ -1,241 +1,241 @@
-# TripoSG 3D模型生成工具
+# TripoSG 3D Model Generation Tool
 
-## 🎯 功能说明
+## 🎯 Overview
 
-这是一个基于 TripoSG 的 3D 模型生成工具，可以从单张 2D 图片生成高质量的 3D GLB 模型文件。该工具集成了图像分割、3D 网格生成、多视角渲染和纹理映射等完整流程。
+This is a 3D model generation tool based on TripoSG that can generate high-quality 3D GLB model files from single 2D images. The tool integrates a complete pipeline including image segmentation, 3D mesh generation, multi-view rendering, and texture mapping.
 
-## 📁 项目结构
+## 📁 Project Structure
 
 ```
 3dGenerate/
-├── triposg.py              # 主处理脚本（批量处理）
-├── triposg.sh              # 启动脚本
-├── requirements.txt        # Python依赖包列表
+├── triposg.py              # Main processing script (batch processing)
+├── triposg.sh              # Startup script
+├── requirements.txt        # Python dependencies list
 ├── assets/
 │   └── image/
-│       └── 1.png          # 示例图片
-├── output2/                # 输出目录（自动创建）
-└── README.md              # 本文档
+│       └── 1.png          # Example image
+├── output2/                # Output directory (auto-created)
+└── README.md              # This document
 ```
 
-## 🔧 环境配置
+## 🔧 Environment Setup
 
-### 1. 创建虚拟环境
+### 1. Create Virtual Environment
 
 ```bash
-# 创建Python虚拟环境
+# Create Python virtual environment
 python -m venv env
 
-# 激活环境
+# Activate environment
 source env/bin/activate  # Linux/macOS
-# 或
+# or
 env\Scripts\activate     # Windows
 ```
 
-### 2. 安装依赖
+### 2. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 主要依赖包：
-- **3D处理**: trimesh, pyrender, open3d, pymeshlab
-- **深度学习**: torch, torchvision, transformers, diffusers
-- **图像处理**: opencv-python, Pillow, scikit-image
-- **其他**: CLIP, LPIPS, tqdm 等
+### Main Dependencies:
+- **3D Processing**: trimesh, pyrender, open3d, pymeshlab
+- **Deep Learning**: torch, torchvision, transformers, diffusers
+- **Image Processing**: opencv-python, Pillow, scikit-image
+- **Others**: CLIP, LPIPS, tqdm, etc.
 
-### 3. 下载预训练模型
+### 3. Download Pre-trained Models
 
-需要下载以下模型到 `checkpoints/` 目录：
-- `RMBG-1.4` - 背景移除模型
-- `TripoSG` - 3D生成模型
-- `RealESRGAN_x2plus.pth` - 纹理超分辨率模型
-- `big-lama.pt` - 纹理修复模型
+Download the following models to the `checkpoints/` directory:
+- `RMBG-1.4` - Background removal model
+- `TripoSG` - 3D generation model
+- `RealESRGAN_x2plus.pth` - Texture super-resolution model
+- `big-lama.pt` - Texture inpainting model
 
-## 🚀 使用方法
+## 🚀 Usage
 
-### 方式一：使用 Shell 脚本（推荐）
+### Method 1: Using Shell Script (Recommended)
 
 ```bash
-./triposg.sh <输入目录>
+./triposg.sh <input_directory>
 ```
 
-示例：
+Examples:
 ```bash
-# 处理 assets/image 文件夹中的所有图片
+# Process all images in assets/image folder
 ./triposg.sh assets/image/
 
-# 处理自定义文件夹
+# Process custom folder
 ./triposg.sh /path/to/your/images/
 ```
 
-**注意**: 如果运行时提示找不到 `triposg_batch_threaded.py`，请修改 `triposg.sh` 脚本的最后一行，将 `triposg_batch_threaded.py` 改为 `triposg.py`。
+**Note**: If you encounter "triposg_batch_threaded.py not found" error, modify the last line of `triposg.sh` script, changing `triposg_batch_threaded.py` to `triposg.py`.
 
-### 方式二：直接运行 Python 脚本
+### Method 2: Run Python Script Directly
 
 ```bash
-python triposg.py <输入目录>
+python triposg.py <input_directory>
 ```
 
-## 📊 处理流程
+## 📊 Processing Pipeline
 
-脚本会自动执行以下步骤：
+The script automatically executes the following steps:
 
-1. **图像分割** - 使用 RMBG 模型移除背景
-2. **3D网格生成** - 使用 TripoSG 生成初始 3D 网格
-3. **多视角渲染** - 生成 6 个视角的渲染图像
-4. **纹理映射** - 生成高质量 4K 纹理的最终模型
+1. **Image Segmentation** - Remove background using RMBG model
+2. **3D Mesh Generation** - Generate initial 3D mesh using TripoSG
+3. **Multi-view Rendering** - Generate rendered images from 6 viewpoints
+4. **Texture Mapping** - Generate final model with high-quality 4K textures
 
-## 📈 输出结果
+## 📈 Output Results
 
-处理完成后，在 `output2/` 目录下会生成以下文件：
+After processing, the following files will be generated in the `output2/` directory:
 
 ```
 output2/
-├── <原文件名>_segmented.png      # 背景移除后的图像
-├── <原文件名>_mesh.glb           # 初始3D网格模型
-├── <原文件名>_multiview.png      # 多视角渲染图
-└── <原文件名>_textured_4k.glb    # 最终带纹理的4K模型
+├── <original_filename>_segmented.png      # Image after background removal
+├── <original_filename>_mesh.glb           # Initial 3D mesh model
+├── <original_filename>_multiview.png      # Multi-view rendering
+└── <original_filename>_textured_4k.glb    # Final textured 4K model
 ```
 
-### 输出文件说明：
-- `*_segmented.png`: 去除背景后的分割图像
-- `*_mesh.glb`: 基础几何网格（约50,000面）
-- `*_multiview.png`: 6个视角的渲染预览图
-- `*_textured_4k.glb`: 最终高质量纹理模型（推荐使用）
+### Output File Description:
+- `*_segmented.png`: Segmented image after background removal
+- `*_mesh.glb`: Basic geometric mesh (~50,000 faces)
+- `*_multiview.png`: Preview image from 6 viewpoints
+- `*_textured_4k.glb`: Final high-quality textured model (recommended)
 
-## ⚙️ 技术参数
+## ⚙️ Technical Parameters
 
-- **默认面数**: 50,000 faces
-- **纹理分辨率**: 4K (4096x4096)
-- **多视角数量**: 6 个视角（前、右、后、左、顶、底）
-- **推理步数**: 30 步（3D生成）/ 15 步（多视角）
-- **设备**: 自动检测 CUDA GPU，无 GPU 则使用 CPU
+- **Default Face Count**: 50,000 faces
+- **Texture Resolution**: 4K (4096x4096)
+- **Multi-view Count**: 6 viewpoints (front, right, back, left, top, bottom)
+- **Inference Steps**: 30 steps (3D generation) / 15 steps (multi-view)
+- **Device**: Auto-detect CUDA GPU, fallback to CPU if unavailable
 
-## 💻 系统要求
+## 💻 System Requirements
 
-### 硬件要求
-- **GPU**: 建议 NVIDIA GPU，显存 ≥ 8GB
-- **内存**: 建议 ≥ 16GB RAM
-- **存储**: 每个模型约 50-200MB
+### Hardware Requirements
+- **GPU**: NVIDIA GPU recommended, VRAM ≥ 8GB
+- **Memory**: ≥ 16GB RAM recommended
+- **Storage**: ~50-200MB per model
 
-### 软件要求
+### Software Requirements
 - Python 3.8+
-- CUDA 11.0+ (使用 GPU 时)
+- CUDA 11.0+ (when using GPU)
 - Linux/macOS/Windows
 
-## ⚠️ 注意事项
+## ⚠️ Important Notes
 
-1. **GPU 内存管理**
-   - 脚本包含自动内存清理机制
-   - 每处理 3 张图片会执行深度清理
-   - 如遇显存不足，会自动切换到分批处理模式
+1. **GPU Memory Management**
+   - Script includes automatic memory cleanup mechanism
+   - Deep cleanup performed every 3 images
+   - Automatically switches to batch processing mode if VRAM insufficient
 
-2. **处理时间**
-   - 单张图片约需 5-15 分钟（取决于 GPU 性能）
-   - 建议先用少量图片测试
+2. **Processing Time**
+   - ~5-15 minutes per image (depends on GPU performance)
+   - Recommended to test with a few images first
 
-3. **超时控制**
-   - 各步骤设有超时限制（90-120秒）
-   - 超时会自动跳过并继续处理下一张
+3. **Timeout Control**
+   - Timeout limits set for each step (90-120 seconds)
+   - Automatically skips and continues to next image on timeout
 
-4. **支持的图片格式**
+4. **Supported Image Formats**
    - PNG, JPG, JPEG
 
-## 🛠️ 故障排除
+## 🛠️ Troubleshooting
 
-### 常见问题
+### Common Issues
 
-**1. 环境激活失败**
+**1. Environment Activation Failed**
 ```bash
-# 检查虚拟环境是否存在
+# Check if virtual environment exists
 ls env/bin/activate
 
-# 重新创建环境
+# Recreate environment
 python -m venv env
 ```
 
-**2. GPU 内存不足**
+**2. GPU Out of Memory**
 ```bash
-# 设置环境变量限制内存使用
+# Set environment variable to limit memory usage
 export PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512
 ```
 
-**3. 模型加载失败**
-- 检查 `checkpoints/` 目录是否包含所需模型
-- 确认模型文件完整性
+**3. Model Loading Failed**
+- Check if `checkpoints/` directory contains required models
+- Verify model file integrity
 
-**4. 依赖包安装失败**
+**4. Dependency Installation Failed**
 ```bash
-# 升级 pip
+# Upgrade pip
 pip install --upgrade pip
 
-# 单独安装问题包
+# Install problematic packages separately
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
 ```
 
-### 查看处理结果
+### View Processing Results
 
 ```bash
-# 查看生成的所有 GLB 文件
+# View all generated GLB files
 find ./output2 -name "*.glb"
 
-# 统计生成的文件数量
+# Count generated files
 find ./output2 -name "*_textured_4k.glb" | wc -l
 ```
 
-## 📊 性能优化
+## 📊 Performance Optimization
 
-脚本已包含以下优化：
-- ✅ 自动内存清理和垃圾回收
-- ✅ 线程超时控制
-- ✅ 子进程强制终止机制
-- ✅ 分批处理模式（内存不足时）
-- ✅ CUDA 内存分配优化
-- ✅ 进度显示和统计信息
+The script includes the following optimizations:
+- ✅ Automatic memory cleanup and garbage collection
+- ✅ Thread timeout control
+- ✅ Subprocess forced termination mechanism
+- ✅ Batch processing mode (when memory insufficient)
+- ✅ CUDA memory allocation optimization
+- ✅ Progress display and statistics
 
-## 📝 使用示例
+## 📝 Usage Examples
 
 ```bash
-# 1. 激活环境
+# 1. Activate environment
 source env/bin/activate
 
-# 2. 处理示例图片
+# 2. Process example images
 ./triposg.sh assets/image/
 
-# 3. 查看结果
+# 3. View results
 ls -lh output2/
 
-# 4. 批量处理多个文件夹
+# 4. Batch process multiple folders
 for dir in folder1 folder2 folder3; do
     ./triposg.sh $dir
 done
 ```
 
-## 🎉 输出示例
+## 🎉 Output Example
 
-处理完成后会显示详细统计：
+After processing, detailed statistics will be displayed:
 
 ```
 ================================================================================
-批处理完成总结:
+Batch Processing Summary:
 ================================================================================
-成功处理: 1/1
+Successfully Processed: 1/1
 ✅ 1
-   分割图像: output2/1_segmented.png
-   网格文件: output2/1_mesh.glb
-   多视角图像: output2/1_multiview.png
-   最终模型: output2/1_textured_4k.glb
+   Segmented Image: output2/1_segmented.png
+   Mesh File: output2/1_mesh.glb
+   Multi-view Image: output2/1_multiview.png
+   Final Model: output2/1_textured_4k.glb
 
-🎉 批处理完成! 成功率: 1/1
+🎉 Batch processing complete! Success rate: 1/1
 ```
 
-## 📚 相关资源
+## 📚 Related Resources
 
-- TripoSG 模型: [相关论文/仓库链接]
-- RMBG 背景移除: [相关链接]
-- RealESRGAN 超分辨率: [相关链接]
+- TripoSG Model: [Related paper/repository link]
+- RMBG Background Removal: [Related link]
+- RealESRGAN Super-resolution: [Related link]
 
 ---
 
-**💡 提示**: 建议先用 `assets/image/` 中的示例图片测试，确认环境配置正确后再处理大批量数据。
+**💡 Tip**: It is recommended to test with example images in `assets/image/` first to confirm the environment is configured correctly before processing large batches of data.
