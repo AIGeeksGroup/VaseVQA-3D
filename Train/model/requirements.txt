@@ -1,0 +1,46 @@
+# PyTorch 和相关库
+torch>=2.0.0
+torchvision>=0.15.0
+torchaudio>=2.0.0
+
+# MS-SWIFT 训练框架
+ms-swift>=2.0.0
+
+# Transformers 和 HuggingFace
+transformers>=4.35.0
+accelerate>=0.24.0
+peft>=0.6.0
+datasets>=2.14.0
+tokenizers>=0.14.0
+
+# HuggingFace Hub
+huggingface-hub>=0.19.0
+
+# 深度学习工具
+einops>=0.7.0
+timm>=0.9.0
+sentencepiece>=0.1.99
+protobuf>=3.20.0
+
+# 视觉模型相关
+Pillow>=9.5.0
+opencv-python>=4.8.0
+
+# 训练监控和日志
+tensorboard>=2.14.0
+wandb>=0.15.0
+tqdm>=4.66.0
+
+# 数据处理
+numpy>=1.24.0
+pandas>=2.0.0
+scipy>=1.10.0
+
+# JSON 和配置
+pyyaml>=6.0
+omegaconf>=2.3.0
+
+# 其他工具
+packaging>=23.0
+requests>=2.31.0
+filelock>=3.12.0

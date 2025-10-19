@@ -1,0 +1,51 @@
+# 3D模型处理
+trimesh==3.21.5
+pyrender==0.1.45
+open3d==0.17.0
+
+# 图像处理
+opencv-python==4.8.0.74
+Pillow==9.5.0
+scikit-image==0.20.0
+
+# 机器学习和深度学习
+torch==2.0.1
+torchvision==0.15.2
+clip-by-openai==1.0
+lpips==0.1.4
+
+# 数值计算
+numpy==1.24.3
+scipy==1.10.1
+scikit-learn==1.2.2
+
+# 可视化
+matplotlib==3.7.1
+
+# 进度条
+tqdm==4.65.0
+
+# OpenGL渲染 (pyrender依赖)
+PyOpenGL==3.1.6
+PyOpenGL-accelerate==3.1.6
+
+# 其他依赖
+networkx==3.1
+
+# 其他依赖
+diffusers
+transformers==4.49.0
+einops
+huggingface_hub
+omegaconf
+peft
+jaxtyping
+typeguard
+pymeshlab==2022.2.post4
+timm
+kornia
+ninja
+#https://huggingface.co/spaces/JeffreyXiang/TRELLIS/resolve/main/wheels/nvdiffrast-0.3.3-cp310-cp310-linux_x86_64.whl?download=true
+cvcuda_cu12
+gltflib
+https://huggingface.co/spaces/VAST-AI/TripoSG/resolve/main/diso-0.1.4-cp310-cp310-linux_x86_64.whl?download=true
