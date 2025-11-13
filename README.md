@@ -3,7 +3,7 @@
 This is the official repository for the paper:
 > **VaseVQA-3D: Benchmarking 3D VLMs on Ancient Greek Pottery**
 >
-> [Nonghai Zhang](https://github.com/sleepyDogseasea)\*, [Zeyu Zhang](https://steve-zeyu-zhang.github.io/)\*†, [Jiazi Wang](https://github.com/wangjiazi), [Yang Zhao](https://github.com/zhaoyang), and [Hao Tang](https://ha0tang.github.io/)<sup>#</sup>
+> [Nonghai Zhang](https://github.com/sleepyDogseasea)\*, [Zeyu Zhang](https://steve-zeyu-zhang.github.io/)\*†, [Jiazi Wang](https://github.com/wangjiazi)\*, [Yang Zhao](https://github.com/zhaoyang), and [Hao Tang](https://ha0tang.github.io/)<sup>#</sup>
 >
 > \*Equal contribution. †Project lead. <sup>#</sup>Corresponding author.
 >
