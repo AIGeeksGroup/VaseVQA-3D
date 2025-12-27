@@ -372,7 +372,3 @@ For questions and discussions, please:
 - Contact the authors via email
 - Visit our [project website](https://aigeeksgroup.github.io/VaseVQA-3D/)
 
----
-
-**Made with ❤️ by the AI Geeks Group**
-
