@@ -7,6 +7,8 @@ This is the official repository for the paper:
 >
 > \*Equal contribution. †Project lead. <sup>#</sup>Corresponding author.
 >
+> ***ICLR 2026***
+>
 > ### [Paper](https://arxiv.org/abs/2510.04479) | [Website](https://aigeeksgroup.github.io/VaseVQA-3D/) | [Dataset](https://huggingface.co/datasets/AIGeeksGroup/VaseVQA-3D) | [Models](https://huggingface.co/AIGeeksGroup/VaseVLM) | [HF Paper](https://huggingface.co/papers/2510.04479)
 
 > [!NOTE]
